@@ -329,7 +329,7 @@ static void update_head(game_state_t *state, unsigned int snum)
     // find_snakes(state, snum);
     char h_next = next_square(state, snum);
     char head = get_board_at(state, state->snakes->head_row, state->snakes->head_col);
-    if (h_next == '#') {
+    if (h_next != ' ' && h_next != '*') {
         set_board_at(state, state->snakes->head_row, state->snakes->head_col, 'x');
     } else {
         set_board_at(state, state->snakes->head_row, state->snakes->head_col, head_to_body(head));
@@ -354,6 +354,13 @@ static void update_head(game_state_t *state, unsigned int snum)
 */
 static void update_tail(game_state_t *state, unsigned int snum)
 {
+    find_snakes(state, snum);
+    char tail = get_board_at(state, state->snakes->tail_row, state->snakes->tail_col);
+    set_board_at(state, state->snakes->tail_row, state->snakes->tail_col, ' ');
+    state->snakes->tail_row = get_next_row(state->snakes->tail_row, tail);
+    state->snakes->tail_col = get_next_col(state->snakes->tail_col, tail);
+    char n_tail = get_board_at(state, state->snakes->tail_row, state->snakes->tail_col);
+    set_board_at(state, state->snakes->tail_row, state->snakes->tail_col, body_to_tail(n_tail));
     // TODO: Implement this function.
     return;
 }
@@ -361,6 +368,19 @@ static void update_tail(game_state_t *state, unsigned int snum)
 /* Task 4.5 */
 void update_state(game_state_t *state, int (*add_food)(game_state_t *state))
 {
+    char h_next = next_square(state, 0);
+    update_head(state, 0);
+    if (get_board_at(state, state->snakes->head_row, state->snakes->head_col) == 'x') {
+        state->snakes->live = false;
+        return;
+    }
+
+    if (h_next != '*' && h_next != '#') {
+        update_tail(state, 0);
+    }
+    if (h_next == '*') {
+        add_food(state);
+    }
     // TODO: Implement this function.
     return;
 }
